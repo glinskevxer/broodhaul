@@ -15,7 +15,10 @@ export default [
       eqeqeq: ['error', 'always'],
       'no-var': 'error',
       'prefer-const': 'error',
-      'no-unused-vars': ['error', { argsIgnorePattern: '^_' }],
+      'no-unused-vars': [
+        'error',
+        { argsIgnorePattern: '^_', ignoreRestSiblings: true },
+      ],
       'no-throw-literal': 'error',
     },
   },
