@@ -1,4 +1,5 @@
 import { ValidationError } from './errors.js';
+import { round } from './rounding.js';
 
 /**
  * Money is integer cents everywhere in this codebase. Pollination rent is
@@ -48,45 +49,21 @@ export function formatMoney(cents, { symbol = '$', grouped = true } = {}) {
   return `${negative ? '-' : ''}${symbol}${grouping}.${fraction}`;
 }
 
-const ROUNDERS = {
-  'half-up': (value) => Math.sign(value) * Math.round(Math.abs(value)),
-  'half-even': (value) => {
-    const floor = Math.floor(value);
-    const diff = value - floor;
-    if (diff > 0.5) return floor + 1;
-    if (diff < 0.5) return floor;
-    return floor % 2 === 0 ? floor : floor + 1;
-  },
-  down: (value) => Math.trunc(value),
-  up: (value) => (value < 0 ? Math.floor(value) : Math.ceil(value)),
-};
-
-export function roundCents(value, mode = 'half-up') {
-  const rounder = ROUNDERS[mode];
-  if (!rounder) {
-    throw new ValidationError(`unknown rounding mode ${mode}`, {
-      mode,
-      allowed: Object.keys(ROUNDERS),
-    });
-  }
-  return rounder(value);
-}
-
 export function multiplyMoney(cents, factor, mode = 'half-up') {
   if (!Number.isFinite(factor)) {
     throw new ValidationError('factor must be finite', { factor });
   }
-  return roundCents(cents * factor, mode);
+  return round(cents * factor, mode);
 }
 
 export function divideMoney(cents, divisor, mode = 'half-up') {
   if (divisor === 0) throw new ValidationError('cannot divide money by zero', {});
-  return roundCents(cents / divisor, mode);
+  return round(cents / divisor, mode);
 }
 
 /** Basis points, because contract commissions are quoted that way. */
 export function basisPoints(cents, bps, mode = 'half-up') {
-  return roundCents((cents * bps) / 10000, mode);
+  return round((cents * bps) / 10000, mode);
 }
 
 /**

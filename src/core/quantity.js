@@ -1,5 +1,5 @@
 import { ValidationError } from './errors.js';
-import { roundCents } from './money.js';
+import { round } from './rounding.js';
 
 /**
  * Fixed point quantities.
@@ -27,7 +27,7 @@ export function makeQuantity(value, places, unit) {
   if (typeof value !== 'number' || !Number.isFinite(value)) {
     throw new ValidationError('quantity must be a finite number', { value, unit });
   }
-  const scaled = roundCents(value * factor, 'half-up');
+  const scaled = round(value * factor, 'half-up');
   if (Math.abs(scaled - value * factor) > 1e-6) {
     throw new ValidationError(
       `${value} ${unit} needs more than ${places} decimal places`,
@@ -85,7 +85,7 @@ export function scaleQuantity(quantity, factor, mode = 'half-up') {
     throw new ValidationError('factor must be finite', { factor });
   }
   return {
-    scaled: roundCents(quantity.scaled * factor, mode),
+    scaled: round(quantity.scaled * factor, mode),
     places: quantity.places,
     unit: quantity.unit,
   };
@@ -105,7 +105,7 @@ export function compareQuantity(left, right) {
 export function averageQuantity(quantities, mode = 'half-up') {
   const total = sumQuantities(quantities);
   return {
-    scaled: roundCents(total.scaled / quantities.length, mode),
+    scaled: round(total.scaled / quantities.length, mode),
     places: total.places,
     unit: total.unit,
   };
@@ -116,5 +116,5 @@ export function roundToStep(value, step, mode = 'half-up') {
   if (!Number.isFinite(step) || step <= 0) {
     throw new ValidationError('step must be a positive number', { step });
   }
-  return roundCents(value / step, mode) * step;
+  return round(value / step, mode) * step;
 }

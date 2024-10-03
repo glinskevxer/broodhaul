@@ -2,7 +2,6 @@ import { describe, it, expect } from 'vitest';
 import {
   parseMoney,
   formatMoney,
-  roundCents,
   multiplyMoney,
   divideMoney,
   basisPoints,
@@ -68,34 +67,6 @@ describe('formatMoney', () => {
 
   it('refuses a fractional cent', () => {
     expect(() => formatMoney(10.5)).toThrow(/whole cents/);
-  });
-});
-
-describe('roundCents', () => {
-  it('rounds half away from zero by default', () => {
-    expect(roundCents(2.5)).toBe(3);
-    expect(roundCents(-2.5)).toBe(-3);
-  });
-
-  it('rounds half to even when asked', () => {
-    expect(roundCents(2.5, 'half-even')).toBe(2);
-    expect(roundCents(3.5, 'half-even')).toBe(4);
-    expect(roundCents(2.4, 'half-even')).toBe(2);
-    expect(roundCents(2.6, 'half-even')).toBe(3);
-  });
-
-  it('truncates toward zero on down', () => {
-    expect(roundCents(2.9, 'down')).toBe(2);
-    expect(roundCents(-2.9, 'down')).toBe(-2);
-  });
-
-  it('rounds away from zero on up', () => {
-    expect(roundCents(2.1, 'up')).toBe(3);
-    expect(roundCents(-2.1, 'up')).toBe(-3);
-  });
-
-  it('names the modes it knows when given a bad one', () => {
-    expect(() => roundCents(1, 'banker')).toThrow(/unknown rounding mode/);
   });
 });
 
