@@ -1,0 +1,102 @@
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  lint:
+    name: lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22.13.1
+          cache: npm
+      - run: npm ci
+      - run: npx eslint . --max-warnings 0
+
+  format:
+    name: format
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22.13.1
+          cache: npm
+      - run: npm ci
+      - run: npx prettier --check .
+
+  test:
+    name: test on node ${{ matrix.node }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        node: ['20.18.2', '22.13.1']
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node }}
+          cache: npm
+      - run: npm ci
+      - run: npx vitest run --reporter=verbose
+
+  coverage:
+    name: coverage
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22.13.1
+          cache: npm
+      - run: npm ci
+      - run: npx vitest run --coverage
+
+  dependencies:
+    name: runtime dependencies
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22.13.1
+          cache: npm
+      - run: npm ci --omit=dev
+      - name: refuse an unexpected runtime dependency
+        run: |
+          set -euo pipefail
+          installed=$(node -e "const p=require('./package.json');console.log(Object.keys(p.dependencies).sort().join(','))")
+          echo "runtime dependencies: $installed"
+          if [ "$installed" != "commander" ]; then
+            echo "the runtime dependency list changed, update this check on purpose"
+            exit 1
+          fi
+
+  timezones:
+    name: timezones
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        tz: ['UTC', 'Pacific/Auckland', 'America/Los_Angeles', 'Asia/Kathmandu']
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22.13.1
+          cache: npm
+      - run: npm ci
+      - name: run the suite under ${{ matrix.tz }}
+        env:
+          TZ: ${{ matrix.tz }}
+        run: npx vitest run --reporter=dot
