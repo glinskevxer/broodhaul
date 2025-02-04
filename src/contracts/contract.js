@@ -37,6 +37,7 @@ export const CROPS = [
 
 const CONTRACT_KEYS = [
   'id',
+  'season',
   'grower',
   'crop',
   'blocks',
@@ -124,9 +125,16 @@ export function makeContract(input) {
       deliveryEnd: delivery.end,
     });
   }
+  const season = seasonOf(delivery.start);
+  if (raw.season !== undefined && raw.season !== season) {
+    throw new ValidationError(
+      `contract season ${raw.season} does not match the delivery window`,
+      { season, given: raw.season }
+    );
+  }
   return {
     id: parseId(raw.id, 'contract').id,
-    season: seasonOf(delivery.start),
+    season,
     grower: parseGrower(raw.grower),
     crop: requireOneOf(raw.crop, 'contract.crop', CROPS),
     blocks: parseBlocks(raw.blocks),

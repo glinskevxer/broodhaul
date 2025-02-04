@@ -127,6 +127,17 @@ describe('makeContract', () => {
     ).toThrow(/at most 2000/);
   });
 
+  it('takes the season back when a stored contract is read again', () => {
+    const stored = contract();
+    expect(makeContract(stored).season).toBe(2025);
+  });
+
+  it('refuses a season that disagrees with the delivery window', () => {
+    expect(() => contract({ season: 2024 })).toThrow(
+      /does not match the delivery window/
+    );
+  });
+
   it('refuses an unknown key', () => {
     expect(() => makeContract({ ...base, deposit: 100 })).toThrow(
       /contract has unknown keys: deposit/
