@@ -4,6 +4,7 @@ import { fixedClock, systemClock } from '../core/clock.js';
 import { openDesk } from '../desk.js';
 import { createOutput } from './io.js';
 import { registerYardCommands } from './commands/yard.js';
+import { registerColonyCommands } from './commands/colony.js';
 
 export const VERSION = '0.1.0';
 
@@ -59,6 +60,7 @@ export function buildProgram(context) {
     writeErr: (text) => context.output.warn(text.replace(/\n$/, '')),
   });
   registerYardCommands(program, context);
+  registerColonyCommands(program, context);
   return program;
 }
 
