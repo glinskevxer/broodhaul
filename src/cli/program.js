@@ -5,6 +5,7 @@ import { openDesk } from '../desk.js';
 import { createOutput } from './io.js';
 import { registerYardCommands } from './commands/yard.js';
 import { registerColonyCommands } from './commands/colony.js';
+import { registerPalletCommands } from './commands/pallet.js';
 
 export const VERSION = '0.1.0';
 
@@ -61,6 +62,7 @@ export function buildProgram(context) {
   });
   registerYardCommands(program, context);
   registerColonyCommands(program, context);
+  registerPalletCommands(program, context);
   return program;
 }
 
