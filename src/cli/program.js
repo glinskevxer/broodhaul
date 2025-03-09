@@ -8,6 +8,7 @@ import { registerColonyCommands } from './commands/colony.js';
 import { registerPalletCommands } from './commands/pallet.js';
 import { registerBlockCommands } from './commands/block.js';
 import { registerContractCommands } from './commands/contract.js';
+import { registerDropCommands } from './commands/drop.js';
 
 export const VERSION = '0.1.0';
 
@@ -67,6 +68,7 @@ export function buildProgram(context) {
   registerPalletCommands(program, context);
   registerBlockCommands(program, context);
   registerContractCommands(program, context);
+  registerDropCommands(program, context);
   return program;
 }
 
