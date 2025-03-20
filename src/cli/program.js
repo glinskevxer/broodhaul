@@ -10,6 +10,7 @@ import { registerBlockCommands } from './commands/block.js';
 import { registerContractCommands } from './commands/contract.js';
 import { registerDropCommands } from './commands/drop.js';
 import { registerLoadCommands } from './commands/load.js';
+import { registerGradingCommands } from './commands/grading.js';
 
 export const VERSION = '0.1.0';
 
@@ -71,6 +72,7 @@ export function buildProgram(context) {
   registerContractCommands(program, context);
   registerDropCommands(program, context);
   registerLoadCommands(program, context);
+  registerGradingCommands(program, context);
   return program;
 }
 
