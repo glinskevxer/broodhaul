@@ -13,6 +13,7 @@ import { registerLoadCommands } from './commands/load.js';
 import { registerGradingCommands } from './commands/grading.js';
 import { registerHealthCommands } from './commands/health.js';
 import { registerHoneyCommands } from './commands/honey.js';
+import { registerSettlementCommands } from './commands/settlement.js';
 
 export const VERSION = '0.1.0';
 
@@ -77,6 +78,7 @@ export function buildProgram(context) {
   registerGradingCommands(program, context);
   registerHealthCommands(program, context);
   registerHoneyCommands(program, context);
+  registerSettlementCommands(program, context);
   return program;
 }
 
