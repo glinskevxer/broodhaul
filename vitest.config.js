@@ -4,6 +4,11 @@ export default defineConfig({
   test: {
     include: ['tests/**/*.test.js'],
     environment: 'node',
+    // The command tests write real files into a temporary directory, and a
+    // loaded windows machine can take a while over that. Fifteen seconds is
+    // long enough that a slow disk is not a failure and short enough that a
+    // genuine hang still shows up as one.
+    testTimeout: 15000,
     coverage: {
       provider: 'v8',
       include: ['src/**/*.js'],

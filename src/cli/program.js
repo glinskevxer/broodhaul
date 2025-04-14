@@ -15,6 +15,7 @@ import { registerHealthCommands } from './commands/health.js';
 import { registerHoneyCommands } from './commands/honey.js';
 import { registerSettlementCommands } from './commands/settlement.js';
 import { registerCheckCommands } from './commands/check.js';
+import { registerExampleCommands } from './commands/example.js';
 
 export const VERSION = '0.1.0';
 
@@ -81,6 +82,7 @@ export function buildProgram(context) {
   registerHoneyCommands(program, context);
   registerSettlementCommands(program, context);
   registerCheckCommands(program, context);
+  registerExampleCommands(program, context);
   return program;
 }
 
