@@ -16,6 +16,7 @@ import { registerHoneyCommands } from './commands/honey.js';
 import { registerSettlementCommands } from './commands/settlement.js';
 import { registerCheckCommands } from './commands/check.js';
 import { registerExampleCommands } from './commands/example.js';
+import { registerSeasonCommands } from './commands/season.js';
 
 export const VERSION = '0.1.0';
 
@@ -41,14 +42,13 @@ export function buildContext(options = {}) {
     options,
     desk() {
       if (!desk) {
-        if (!options.root) {
+        // The container sets BROODHAUL_ROOT and mounts the records there, so a
+        // command inside it needs no flag. The flag still wins when both exist.
+        const root = options.root ?? process.env.BROODHAUL_ROOT;
+        if (!root) {
           throw new ValidationError('no record directory given, use --root', {});
         }
-        desk = openDesk({
-          root: options.root,
-          actor: options.actor ?? 'office',
-          clock,
-        });
+        desk = openDesk({ root, actor: options.actor ?? 'office', clock });
       }
       return desk;
     },
@@ -83,6 +83,7 @@ export function buildProgram(context) {
   registerSettlementCommands(program, context);
   registerCheckCommands(program, context);
   registerExampleCommands(program, context);
+  registerSeasonCommands(program, context);
   return program;
 }
 
