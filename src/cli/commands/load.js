@@ -15,6 +15,7 @@ import {
 import { makeCertificate, checkMovement } from '../../movement/permit.js';
 import { checkYardMovable } from '../../health/inspection.js';
 import { indexBy } from '../../core/collections.js';
+import { parseIdList } from '../parse.js';
 
 /**
  * Load commands.
@@ -65,7 +66,7 @@ export function registerLoadCommands(program, context) {
         driver: options.driver,
         originYardId: options.from,
         destination: { kind: options.destinationKind, id: options.to },
-        pallets: options.pallets.split(',').map((entry) => entry.trim()),
+        pallets: parseIdList(options.pallets, 'pallets'),
       });
       checkYardMovable(
         desk.store.list('inspections'),

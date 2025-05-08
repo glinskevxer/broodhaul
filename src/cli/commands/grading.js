@@ -1,4 +1,4 @@
-import { ValidationError } from '../../core/errors.js';
+import { asText, parseList } from '../parse.js';
 import { formatMoney } from '../../core/money.js';
 import {
   makeGradingRun,
@@ -22,6 +22,29 @@ import { describeConditions } from '../../grading/conditions.js';
  * and the grader can argue with the thermometer instead of the software.
  */
 
+const READINGS = {
+  label: 'readings',
+  example: 'CY-2025-0011:8,CY-2025-0012:6.5',
+  fields: [
+    { name: 'colonyId', convert: asText },
+    { name: 'measure', convert: asText },
+    { name: 'flag', convert: asText, optional: true },
+  ],
+};
+
+/** A measure ending in `in` is a cluster width; anything else is frames. */
+function toReading(entry) {
+  const reading = { colonyId: entry.colonyId };
+  if (entry.measure.endsWith('in')) {
+    reading.clusterInches = Number(entry.measure.slice(0, -2));
+  } else {
+    reading.frames = Number(entry.measure);
+  }
+  if (entry.flag === 'queenless') reading.queenright = false;
+  if (entry.flag === 'nobrood') reading.brood = false;
+  return reading;
+}
+
 const LIST_COLUMNS = [
   { header: 'run', key: 'id' },
   { header: 'contract', key: 'contractId' },
@@ -30,27 +53,6 @@ const LIST_COLUMNS = [
   { header: 'read', key: 'read', align: 'right' },
   { header: 'average', key: 'average', align: 'right' },
 ];
-
-function parseReadings(text) {
-  return text.split(',').map((entry) => {
-    const [colonyId, measure, flag] = entry.split(':').map((part) => part.trim());
-    if (!colonyId || measure === undefined) {
-      throw new ValidationError(
-        `readings look like "CY-2025-0011:8,CY-2025-0012:6.5", got ${entry}`,
-        { entry }
-      );
-    }
-    const reading = { colonyId };
-    if (measure.endsWith('in')) {
-      reading.clusterInches = Number(measure.slice(0, -2));
-    } else {
-      reading.frames = Number(measure);
-    }
-    if (flag === 'queenless') reading.queenright = false;
-    if (flag === 'nobrood') reading.brood = false;
-    return reading;
-  });
-}
 
 export function registerGradingCommands(program, context) {
   const grading = program.command('grading').description('colony strength grading');
@@ -82,7 +84,7 @@ export function registerGradingCommands(program, context) {
           windMph: Number(options.wind),
           precipitation: options.precipitation,
         },
-        readings: parseReadings(options.readings),
+        readings: parseList(options.readings, READINGS).map(toReading),
         witness: options.witness,
       });
       const method = runMethod(record);

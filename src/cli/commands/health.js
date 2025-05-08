@@ -1,3 +1,4 @@
+import { asNumber, asText, parseIdList, parseList } from '../parse.js';
 import {
   makeTreatment,
   checkLabel,
@@ -39,6 +40,15 @@ import {
  * and then tells them what to do about it, because a number on its own has
  * never once caused anybody to go back out with strips.
  */
+
+const WASHES = {
+  label: 'washes',
+  example: 'CY-2025-0011:9,CY-2025-0012:3',
+  fields: [
+    { name: 'colonyId', convert: asText },
+    { name: 'mites', convert: asNumber },
+  ],
+};
 
 const TREATMENT_COLUMNS = [
   { header: 'treatment', key: 'id' },
@@ -115,15 +125,14 @@ export function registerHealthCommands(program, context) {
     .requiredOption('--yard <id>', 'yard the washes came from')
     .requiredOption('--on <date>', 'day of the sampling')
     .action((options) => {
-      const washes = options.washes.split(',').map((entry) => {
-        const [colonyId, mites] = entry.split(':').map((part) => part.trim());
-        return makeWash({
-          colonyId,
+      const washes = parseList(options.washes, WASHES).map((entry) =>
+        makeWash({
+          colonyId: entry.colonyId,
           yardId: options.yard,
           date: options.on,
-          mites: Number(mites),
-        });
-      });
+          mites: entry.mites,
+        })
+      );
       const rate = yardRate(washes);
       const outcome = actionFor(rate, options.on);
       context.output.value({
@@ -150,7 +159,7 @@ export function registerHealthCommands(program, context) {
     .option('--supers-on', 'honey supers were on')
     .action((options) => {
       const desk = context.desk();
-      const colonies = options.colonies.split(',').map((entry) => entry.trim());
+      const colonies = parseIdList(options.colonies, 'colonies');
       const product = getProduct(options.product);
       const record = makeTreatment({
         id: options.id,
@@ -229,7 +238,7 @@ export function registerHealthCommands(program, context) {
         date: options.on,
         inspector: options.inspector,
         coloniesOpened: Number(options.opened),
-        findings: options.findings.split(',').map((entry) => entry.trim()),
+        findings: parseIdList(options.findings, 'findings'),
         coloniesAffected: Number(options.affected),
       });
       const saved = context.desk().save('inspections', record);

@@ -1,4 +1,4 @@
-import { ValidationError } from '../../core/errors.js';
+import { asNumber, asText, parseList, parseWindow } from '../parse.js';
 import { formatMoney } from '../../core/money.js';
 import { formatSpan } from '../../core/span.js';
 import {
@@ -23,6 +23,25 @@ import { planContractDrops, planTotal, describePlan } from '../../placement/plan
  * on the command line rather than a file nobody will edit correctly.
  */
 
+const BLOCKS = {
+  label: 'blocks',
+  example: 'BK-2025-0001:120:2',
+  fields: [
+    { name: 'blockId', convert: asText },
+    { name: 'acres', convert: asNumber },
+    { name: 'hivesPerAcre', convert: asNumber },
+  ],
+};
+
+const TIERS = {
+  label: 'tiers',
+  example: '10:2500,8:0,6:-2500',
+  fields: [
+    { name: 'atLeast', convert: asNumber },
+    { name: 'adjustmentCents', convert: asNumber },
+  ],
+};
+
 const LIST_COLUMNS = [
   { header: 'contract', key: 'id' },
   { header: 'grower', key: 'grower', format: (grower) => grower.name },
@@ -40,30 +59,6 @@ const LIST_COLUMNS = [
     format: (cents) => formatMoney(cents),
   },
 ];
-
-function parseBlocks(text) {
-  return text.split(',').map((entry) => {
-    const [blockId, acres, perAcre] = entry.split(':').map((part) => part.trim());
-    if (!blockId || acres === undefined || perAcre === undefined) {
-      throw new ValidationError(`blocks look like "BK-2025-0001:120:2", got ${entry}`, {
-        entry,
-      });
-    }
-    return { blockId, acres: Number(acres), hivesPerAcre: Number(perAcre) };
-  });
-}
-
-function parseTiers(text) {
-  return text.split(',').map((entry) => {
-    const [atLeast, adjustment] = entry.split(':').map((part) => part.trim());
-    if (atLeast === undefined || adjustment === undefined) {
-      throw new ValidationError(`tiers look like "10:2500,8:0,6:-2500", got ${entry}`, {
-        entry,
-      });
-    }
-    return { atLeast: Number(atLeast), adjustmentCents: Number(adjustment) };
-  });
-}
 
 export function registerContractCommands(program, context) {
   const contract = program.command('contract').description('pollination contracts');
@@ -94,24 +89,24 @@ export function registerContractCommands(program, context) {
     .option('--broker <name>', 'broker who placed it')
     .option('--commission <bps>', 'broker commission in basis points', '0')
     .action((options) => {
-      const [deliveryStart, deliveryEnd] = options.delivery.split('..');
-      const [removalStart, removalEnd] = options.removal.split('..');
+      const delivery = parseWindow(options.delivery, 'delivery');
+      const removal = parseWindow(options.removal, 'removal');
       const record = makeContract({
         id: options.id,
         grower: { name: options.grower, ranch: options.ranch, county: options.county },
         crop: options.crop,
-        blocks: parseBlocks(options.blocks),
+        blocks: parseList(options.blocks, BLOCKS),
         rateCents: Number(options.rate),
         terms: {
           minimumAverage: Number(options.minimum),
           samplePercent: Number(options.sample),
-          tiers: parseTiers(options.tiers),
+          tiers: parseList(options.tiers, TIERS),
           gradeBy: options.gradeBy,
           shortfall: options.shortfall,
           regradeWithinDays: Number(options.regrade),
         },
-        delivery: { start: deliveryStart, end: deliveryEnd },
-        removal: { start: removalStart, end: removalEnd },
+        delivery,
+        removal,
         broker: options.broker
           ? { name: options.broker, commissionBps: Number(options.commission) }
           : undefined,

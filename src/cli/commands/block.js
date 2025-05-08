@@ -1,4 +1,4 @@
-import { ValidationError } from '../../core/errors.js';
+import { asFlag, asNumber, asText, parseList } from '../parse.js';
 import {
   makeBlock,
   blockTrees,
@@ -26,6 +26,16 @@ import { seasonOf } from '../../core/dates.js';
  * three years old, not because the price went up.
  */
 
+const VARIETIES = {
+  label: 'varieties',
+  example: 'Nonpareil:0.5,Monterey:0.5',
+  fields: [
+    { name: 'name', convert: asText },
+    { name: 'share', convert: asNumber },
+    { name: 'selfFertile', convert: asFlag('self'), optional: true },
+  ],
+};
+
 const LIST_COLUMNS = [
   { header: 'block', key: 'id' },
   { header: 'name', key: 'name' },
@@ -38,20 +48,6 @@ const LIST_COLUMNS = [
     format: (_value, record) => blockTrees(record),
   },
 ];
-
-function parseVarieties(text) {
-  const varieties = text.split(',').map((entry) => {
-    const [name, share, fertile] = entry.split(':').map((part) => part.trim());
-    if (!name || share === undefined) {
-      throw new ValidationError(
-        `varieties look like "Nonpareil:0.5,Monterey:0.5", got ${entry}`,
-        { entry }
-      );
-    }
-    return { name, share: Number(share), selfFertile: fertile === 'self' };
-  });
-  return varieties;
-}
 
 export function registerBlockCommands(program, context) {
   const block = program
@@ -78,7 +74,7 @@ export function registerBlockCommands(program, context) {
         name: options.name,
         crop: options.crop,
         acres: Number(options.acres),
-        varieties: parseVarieties(options.varieties),
+        varieties: parseList(options.varieties, VARIETIES),
         plantedYear: Number(options.planted),
         rowSpacingFt: Number(options.rowSpacing),
         treeSpacingFt: Number(options.treeSpacing),

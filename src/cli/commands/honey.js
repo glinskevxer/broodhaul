@@ -1,6 +1,7 @@
 import { ValidationError } from '../../core/errors.js';
 import { formatMoney } from '../../core/money.js';
 import { readJson, writeJson } from '../../store/files.js';
+import { parseIdList } from '../parse.js';
 import { join } from 'node:path';
 import {
   makeDrum,
@@ -131,8 +132,8 @@ export function registerHoneyCommands(program, context) {
       const lot = makeLot(
         {
           id: options.id,
-          drums: options.drums.split(',').map((entry) => entry.trim()),
-          yardIds: options.yards.split(',').map((entry) => entry.trim()),
+          drums: parseIdList(options.drums, 'drums'),
+          yardIds: parseIdList(options.yards, 'yards'),
           extractedFrom: options.from,
           extractedTo: options.to,
         },
