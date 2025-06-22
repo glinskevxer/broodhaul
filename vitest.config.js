@@ -12,6 +12,11 @@ export default defineConfig({
     // Some command suites build a whole yard in a hook before the first
     // assertion, which is a dozen writes to a temporary directory.
     hookTimeout: 30000,
+    // The command suites all write into the system temporary directory, so
+    // running one worker per core has them queueing on the same filesystem
+    // rather than on the cpu. Four is faster here and far steadier.
+    pool: 'threads',
+    poolOptions: { threads: { minThreads: 1, maxThreads: 4 } },
     coverage: {
       provider: 'v8',
       include: ['src/**/*.js'],
