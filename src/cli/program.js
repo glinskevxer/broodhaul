@@ -19,6 +19,7 @@ import { registerExampleCommands } from './commands/example.js';
 import { registerSeasonCommands } from './commands/season.js';
 import { registerExportCommands } from './commands/export.js';
 import { registerHaulCommands } from './commands/haul.js';
+import { registerIncreaseCommands } from './commands/increase.js';
 
 export const VERSION = '0.1.0';
 
@@ -88,6 +89,7 @@ export function buildProgram(context) {
   registerSeasonCommands(program, context);
   registerExportCommands(program, context);
   registerHaulCommands(program, context);
+  registerIncreaseCommands(program, context);
   return program;
 }
 
