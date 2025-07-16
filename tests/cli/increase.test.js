@@ -2,29 +2,12 @@ import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { mkdtempSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { runCli } from '../../src/cli/program.js';
-import { captureOutput } from '../../src/cli/io.js';
+import { cliRunner } from '../helpers/cli.js';
 import { EQUIPMENT_KINDS } from '../../src/apiary/equipment.js';
 
 let root;
 
-async function run(args, { json = false } = {}) {
-  const capture = captureOutput({ json });
-  const status = await runCli(
-    [
-      '--root',
-      root,
-      '--actor',
-      'M Ojeda',
-      '--today',
-      '2025-09-01',
-      ...(json ? ['--json'] : []),
-      ...args,
-    ],
-    { output: capture.output }
-  );
-  return { status, capture };
-}
+const run = cliRunner(() => root, { today: '2025-09-01' });
 
 beforeEach(() => {
   root = mkdtempSync(join(tmpdir(), 'broodhaul-increase-'));

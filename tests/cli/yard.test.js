@@ -2,8 +2,9 @@ import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { mkdtempSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { parseGlobals, runCli, VERSION } from '../../src/cli/program.js';
 import { captureOutput } from '../../src/cli/io.js';
+import { cliRunner } from '../helpers/cli.js';
+import { parseGlobals, runCli, VERSION } from '../../src/cli/program.js';
 
 let root;
 
@@ -15,23 +16,7 @@ afterEach(() => {
   rmSync(root, { recursive: true, force: true });
 });
 
-const run = async (args, { json = false } = {}) => {
-  const capture = captureOutput({ json });
-  const status = await runCli(
-    [
-      '--root',
-      root,
-      '--actor',
-      'M Ojeda',
-      '--today',
-      '2025-06-20',
-      ...(json ? ['--json'] : []),
-      ...args,
-    ],
-    { output: capture.output }
-  );
-  return { status, capture };
-};
+const run = cliRunner(() => root, { today: '2025-06-20' });
 
 const addYard = (overrides = []) =>
   run([
