@@ -40,15 +40,13 @@ const DRUM_COLUMNS = [
   { header: 'source', key: 'floralSource' },
   {
     header: 'net',
-    key: 'grossLb',
     align: 'right',
-    format: (_value, drum) => netLb(drum),
+    value: (drum) => netLb(drum),
   },
   { header: 'moisture', key: 'moisturePct', align: 'right' },
   {
     header: 'grade',
-    key: 'moisturePct',
-    format: (_value, drum) => (isSaleable(drum) ? 'ok' : `over ${moistureOver(drum)}`),
+    value: (drum) => (isSaleable(drum) ? 'ok' : `over ${moistureOver(drum)}`),
   },
 ];
 

@@ -55,7 +55,7 @@ const TREATMENT_COLUMNS = [
   { header: 'yard', key: 'yardId' },
   { header: 'product', key: 'product' },
   { header: 'applied', key: 'appliedOn' },
-  { header: 'due off', key: 'appliedOn', format: (_value, record) => dueOffOn(record) },
+  { header: 'due off', value: (record) => dueOffOn(record) },
   { header: 'removed', key: 'removedOn' },
 ];
 

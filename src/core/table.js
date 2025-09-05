@@ -28,9 +28,13 @@ function columnWidths(columns, rows) {
 }
 
 /**
- * `columns` is a list of `{ header, key, align }`. Anything not listed in the
- * columns is left out, so the same record can feed a wide office report and a
- * narrow one for the truck.
+ * `columns` is a list of `{ header, align }` plus one of `key` or `value`.
+ * A `key` reads a field; a `value` is a function over the whole record, which
+ * is what a derived column wants. `format` then turns whatever came out into
+ * the string that gets printed.
+ *
+ * The two argument formatter this replaced worked, but every derived column
+ * had to name a field it did not use, and three of them named the wrong one.
  */
 export function renderTable(columns, records, { rule = true } = {}) {
   if (columns.length === 0) {
@@ -38,9 +42,8 @@ export function renderTable(columns, records, { rule = true } = {}) {
   }
   const rows = records.map((record) =>
     columns.map((column) => {
-      const value = column.format
-        ? column.format(record[column.key], record)
-        : record[column.key];
+      const raw = column.value ? column.value(record) : record[column.key];
+      const value = column.format ? column.format(raw) : raw;
       return value === null || value === undefined ? '' : String(value);
     })
   );

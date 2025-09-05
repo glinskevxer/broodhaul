@@ -44,9 +44,8 @@ export function setSheet(desk, contractId) {
         { header: 'set', key: 'set', align: 'right' },
         {
           header: 'short',
-          key: 'ordered',
           align: 'right',
-          format: (_value, drop) => shortBy(drop),
+          value: (drop) => shortBy(drop),
         },
       ],
       drops
@@ -87,16 +86,13 @@ export function loadManifest(desk, loadId) {
         { header: 'pattern', key: 'pattern' },
         {
           header: 'on',
-          key: 'id',
           align: 'right',
-          format: (_value, pallet) =>
-            `${occupiedCount(pallet)} of ${palletCapacity(pallet)}`,
+          value: (pallet) => `${occupiedCount(pallet)} of ${palletCapacity(pallet)}`,
         },
         {
           header: 'weight',
-          key: 'tareLb',
           align: 'right',
-          format: (_value, pallet) => palletWeightLb(pallet, 'bloom'),
+          value: (pallet) => palletWeightLb(pallet, 'bloom'),
         },
       ],
       pallets

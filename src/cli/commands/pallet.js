@@ -24,9 +24,8 @@ const LIST_COLUMNS = [
   { header: 'yard', key: 'yardId' },
   {
     header: 'on',
-    key: 'positions',
     align: 'right',
-    format: (_value, record) => `${occupiedCount(record)} of ${palletCapacity(record)}`,
+    value: (record) => `${occupiedCount(record)} of ${palletCapacity(record)}`,
   },
   { header: 'tare', key: 'tareLb', align: 'right' },
 ];

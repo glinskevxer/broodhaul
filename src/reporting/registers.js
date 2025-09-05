@@ -44,9 +44,8 @@ const REGISTERS = {
       { header: 'since', key: 'statusOn' },
       {
         header: 'boxes',
-        key: 'id',
         align: 'right',
-        format: (_value, colony) => boxCount(colony),
+        value: (colony) => boxCount(colony),
       },
     ],
     rows: (desk) => desk.store.list('colonies'),
@@ -59,10 +58,8 @@ const REGISTERS = {
       { header: 'pattern', key: 'pattern' },
       {
         header: 'on',
-        key: 'id',
         align: 'right',
-        format: (_value, pallet) =>
-          `${occupiedCount(pallet)} of ${palletCapacity(pallet)}`,
+        value: (pallet) => `${occupiedCount(pallet)} of ${palletCapacity(pallet)}`,
       },
     ],
     rows: (desk) => desk.store.list('pallets'),
@@ -75,15 +72,13 @@ const REGISTERS = {
       { header: 'crop', key: 'crop' },
       {
         header: 'hives',
-        key: 'id',
         align: 'right',
-        format: (_value, contract) => contractedHives(contract),
+        value: (contract) => contractedHives(contract),
       },
       {
         header: 'value',
-        key: 'id',
         align: 'right',
-        format: (_value, contract) => formatMoney(contractValueCents(contract)),
+        value: (contract) => formatMoney(contractValueCents(contract)),
       },
     ],
     rows: (desk) => desk.store.list('contracts'),
@@ -97,9 +92,8 @@ const REGISTERS = {
       { header: 'set', key: 'set', align: 'right' },
       {
         header: 'short',
-        key: 'id',
         align: 'right',
-        format: (_value, drop) => shortBy(drop),
+        value: (drop) => shortBy(drop),
       },
       { header: 'set on', key: 'setOn' },
       { header: 'pulled', key: 'pulledOn' },
@@ -127,13 +121,11 @@ const REGISTERS = {
       { header: 'applied', key: 'appliedOn' },
       {
         header: 'due off',
-        key: 'id',
-        format: (_value, treatment) => dueOffOn(treatment),
+        value: (treatment) => dueOffOn(treatment),
       },
       {
         header: 'on',
-        key: 'id',
-        format: (_value, treatment) => (isOnHives(treatment) ? 'yes' : ''),
+        value: (treatment) => (isOnHives(treatment) ? 'yes' : ''),
       },
     ],
     rows: (desk) => desk.store.list('treatments'),

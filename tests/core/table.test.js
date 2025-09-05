@@ -70,13 +70,12 @@ describe('renderTable', () => {
     expect(text.split('\n')[2]).toBe('$205');
   });
 
-  it('gives the formatter the whole record', () => {
+  it('gives a value column the whole record', () => {
     const text = renderTable(
       [
         {
           header: 'note',
-          key: 'hives',
-          format: (value, record) => `${value} at ${record.yard}`,
+          value: (record) => `${record.hives} at ${record.yard}`,
         },
       ],
       [{ yard: 'YD-9', hives: 12 }]

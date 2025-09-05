@@ -43,9 +43,8 @@ const LIST_COLUMNS = [
   { header: 'acres', key: 'acres', align: 'right' },
   {
     header: 'trees',
-    key: 'acres',
     align: 'right',
-    format: (_value, record) => blockTrees(record),
+    value: (record) => blockTrees(record),
   },
 ];
 

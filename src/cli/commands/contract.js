@@ -48,9 +48,8 @@ const LIST_COLUMNS = [
   { header: 'crop', key: 'crop' },
   {
     header: 'hives',
-    key: 'blocks',
     align: 'right',
-    format: (_value, record) => contractedHives(record),
+    value: (record) => contractedHives(record),
   },
   {
     header: 'rate',

@@ -23,9 +23,8 @@ const LIST_COLUMNS = [
   { header: 'status', key: 'status' },
   {
     header: 'boxes',
-    key: 'boxes',
     align: 'right',
-    format: (_value, record) => boxCount(record),
+    value: (record) => boxCount(record),
   },
 ];
 
