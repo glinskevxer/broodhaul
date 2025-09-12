@@ -23,6 +23,7 @@ import { registerIncreaseCommands } from './commands/increase.js';
 import { registerStoreCommands } from './commands/store.js';
 import { registerPrintCommands } from './commands/print.js';
 import { registerOfficeCommands } from './commands/office.js';
+import { registerPlanCommands } from './commands/plan.js';
 
 export const VERSION = '0.1.0';
 
@@ -96,6 +97,7 @@ export function buildProgram(context) {
   registerStoreCommands(program, context);
   registerPrintCommands(program, context);
   registerOfficeCommands(program, context);
+  registerPlanCommands(program, context);
   return program;
 }
 
