@@ -24,6 +24,7 @@ import { registerStoreCommands } from './commands/store.js';
 import { registerPrintCommands } from './commands/print.js';
 import { registerOfficeCommands } from './commands/office.js';
 import { registerPlanCommands } from './commands/plan.js';
+import { registerSelfTestCommands } from './commands/selftest.js';
 
 export const VERSION = '0.1.0';
 
@@ -98,6 +99,7 @@ export function buildProgram(context) {
   registerPrintCommands(program, context);
   registerOfficeCommands(program, context);
   registerPlanCommands(program, context);
+  registerSelfTestCommands(program, context);
   return program;
 }
 

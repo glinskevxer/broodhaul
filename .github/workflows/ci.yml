@@ -40,7 +40,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        node: ['20.18.2', '22.13.1']
+        node: ['20.18.2', '22.13.1', '24.0.0']
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -95,8 +95,60 @@ jobs:
         with:
           node-version: 22.13.1
           cache: npm
-      - run: npm ci
+      - name: install
+        run: npm ci
       - name: run the suite under ${{ matrix.tz }}
         env:
           TZ: ${{ matrix.tz }}
         run: npx vitest run --reporter=dot
+
+  worked-example:
+    name: worked example
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22.13.1
+          cache: npm
+      - run: npm ci --omit=dev
+      - name: run a season through the installed command
+        run: |
+          set -euo pipefail
+          records=$(mktemp -d)
+          run() { node bin/broodhaul.js --root "$records" --actor ci --today 2025-03-20 "$@"; }
+          run example load
+          run check
+          run season 2025 --json > season.json
+          run settle statement "Wilkins Farming" --season 2025 --json > statement.json
+          run export all "$records/csv" > /dev/null
+          run print set-sheet CT-2025-0007 > sheet.txt
+          node -e "
+            const fs = require('node:fs');
+            const season = JSON.parse(fs.readFileSync('season.json', 'utf8'));
+            const statement = JSON.parse(fs.readFileSync('statement.json', 'utf8'));
+            const sheet = fs.readFileSync('sheet.txt', 'utf8');
+            if (season.hivesOrdered !== 48) throw new Error('hives ordered: ' + season.hivesOrdered);
+            if (season.hivesShort !== 4) throw new Error('hives short: ' + season.hivesShort);
+            if (statement.contracts !== 1) throw new Error('contracts: ' + statement.contracts);
+            if (statement.totalCents >= 48 * 20500) throw new Error('statement was not discounted');
+            if (!sheet.includes('4 hives short')) throw new Error('set sheet did not print the shortfall');
+            console.log('worked example checked', season.hivesSet, 'hives set,', statement.totalCents, 'cents');
+          "
+
+  container:
+    name: container
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: build the image
+        run: docker build -t broodhaul:ci .
+      - name: run the worked season inside it
+        run: |
+          set -euo pipefail
+          records=$(mktemp -d)
+          chmod 777 "$records"
+          docker run --rm -v "$records:/records" broodhaul:ci --actor ci --today 2025-03-20 example load
+          docker run --rm -v "$records:/records" broodhaul:ci --actor ci --today 2025-03-20 check
+          docker run --rm -v "$records:/records" broodhaul:ci --actor ci --today 2025-03-20 counts
+          test -f "$records/contracts/CT-2025-0007.json"
