@@ -116,25 +116,12 @@ jobs:
         run: |
           set -euo pipefail
           records=$(mktemp -d)
-          run() { node bin/broodhaul.js --root "$records" --actor ci --today 2025-03-20 "$@"; }
-          run example load
-          run check
-          run season 2025 --json > season.json
-          run settle statement "Wilkins Farming" --season 2025 --json > statement.json
-          run export all "$records/csv" > /dev/null
-          run print set-sheet CT-2025-0007 > sheet.txt
-          node -e "
-            const fs = require('node:fs');
-            const season = JSON.parse(fs.readFileSync('season.json', 'utf8'));
-            const statement = JSON.parse(fs.readFileSync('statement.json', 'utf8'));
-            const sheet = fs.readFileSync('sheet.txt', 'utf8');
-            if (season.hivesOrdered !== 48) throw new Error('hives ordered: ' + season.hivesOrdered);
-            if (season.hivesShort !== 4) throw new Error('hives short: ' + season.hivesShort);
-            if (statement.contracts !== 1) throw new Error('contracts: ' + statement.contracts);
-            if (statement.totalCents >= 48 * 20500) throw new Error('statement was not discounted');
-            if (!sheet.includes('4 hives short')) throw new Error('set sheet did not print the shortfall');
-            console.log('worked example checked', season.hivesSet, 'hives set,', statement.totalCents, 'cents');
-          "
+          node bin/broodhaul.js selftest
+          node bin/broodhaul.js --root "$records" --actor ci --today 2025-03-20 example load
+          node bin/broodhaul.js --root "$records" --actor ci --today 2025-03-20 check
+          node bin/broodhaul.js --root "$records" --actor ci --today 2025-03-20 export all "$records/csv"
+          node bin/broodhaul.js --root "$records" --actor ci --today 2025-03-20 print set-sheet CT-2025-0007
+          test -f "$records/csv/gradings.csv"
 
   container:
     name: container
@@ -151,4 +138,5 @@ jobs:
           docker run --rm -v "$records:/records" broodhaul:ci --actor ci --today 2025-03-20 example load
           docker run --rm -v "$records:/records" broodhaul:ci --actor ci --today 2025-03-20 check
           docker run --rm -v "$records:/records" broodhaul:ci --actor ci --today 2025-03-20 counts
+          docker run --rm broodhaul:ci selftest
           test -f "$records/contracts/CT-2025-0007.json"
