@@ -133,3 +133,37 @@ export {
   renderStatement,
   statementSummary,
 } from './settlement/statement.js';
+
+export {
+  makeGraft,
+  expectedQueens,
+  graftsNeeded,
+  scheduleFor,
+} from './apiary/queen.js';
+export { planIncrease, latestMakeDate, willMakeGrade } from './apiary/split.js';
+export { inventoryReport, shortfallFor, EQUIPMENT_KINDS } from './apiary/equipment.js';
+export { regradeOutcome, governingRun, TOLERANCE_FRAMES } from './grading/regrade.js';
+export { renewContract, renewalDifference, renewalBook } from './contracts/renewal.js';
+export { instalments, depositCents, lateInterestCents } from './contracts/deposit.js';
+export { makeRoute, summariseRoute, checkHours } from './movement/route.js';
+export { scheduleLoads, nightsNeeded, LOADS_PER_NIGHT } from './movement/dispatch.js';
+export { makeTicket, checkTicket, compareToEstimate } from './movement/scale.js';
+export { planDay, supersReturnAfter, latestStartFor } from './health/schedule.js';
+export { healthRegister, worstYards, treatmentDueOff } from './health/register.js';
+export { feedingPlan, cheapestForProtein, RATION_KINDS } from './feeding/ration.js';
+export { syrupRunFor, splitIntoDays, proteinRunFor } from './feeding/schedule.js';
+export { makeShipment, checkShippable, shipmentSummary } from './honey/pack.js';
+export { makeLedger, balancesByGrower, agingReport } from './settlement/ledger.js';
+export { renderSeason, seasonSummary } from './reporting/season.js';
+export { renderRegister, registerNames } from './reporting/registers.js';
+export { renderDocument, documentNames } from './reporting/documents.js';
+export { exportCsv, exportNames } from './reporting/export.js';
+export { kpis, kpiRows } from './reporting/kpi.js';
+export {
+  takeSnapshot,
+  restoreSnapshot,
+  differenceFromSnapshot,
+} from './store/snapshot.js';
+export { runMigrations, planMigration, latestVersion } from './store/migrate.js';
+export { runSelfTest, CHECKS } from './cli/commands/selftest.js';
+export { SEASON, loadSeason } from './examples/season.js';

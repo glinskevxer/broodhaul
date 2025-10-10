@@ -27,7 +27,7 @@ import { registerPlanCommands } from './commands/plan.js';
 import { registerSelfTestCommands } from './commands/selftest.js';
 import { registerYardworkCommands } from './commands/yardwork.js';
 
-export const VERSION = '0.1.0';
+export const VERSION = '1.0.0';
 
 /**
  * The command line.
