@@ -27,6 +27,7 @@ import { registerPlanCommands } from './commands/plan.js';
 import { registerSelfTestCommands } from './commands/selftest.js';
 import { registerYardworkCommands } from './commands/yardwork.js';
 import { registerComplianceCommands } from './commands/compliance.js';
+import { registerAuditCommands } from './commands/audit.js';
 
 export const VERSION = '1.0.0';
 
@@ -104,6 +105,7 @@ export function buildProgram(context) {
   registerSelfTestCommands(program, context);
   registerYardworkCommands(program, context);
   registerComplianceCommands(program, context);
+  registerAuditCommands(program, context);
   return program;
 }
 
