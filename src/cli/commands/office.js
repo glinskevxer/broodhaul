@@ -1,5 +1,4 @@
-import { join } from 'node:path';
-import { readJson, writeJson } from '../../store/files.js';
+import { openBook } from '../../store/book.js';
 import { formatMoney } from '../../core/money.js';
 import {
   registerNames,
@@ -25,13 +24,14 @@ import {
 
 const LEDGER_FILE = 'settlement/ledger.json';
 
+const ledgerBook = (root) => openBook(root, LEDGER_FILE, (entry) => entry);
+
 function loadLedger(root) {
-  return makeLedger(readJson(join(root, LEDGER_FILE), { missing: [] }));
+  return makeLedger(ledgerBook(root).read());
 }
 
 function saveLedger(root, entries) {
-  writeJson(join(root, LEDGER_FILE), entries);
-  return entries;
+  return ledgerBook(root).write(entries);
 }
 
 const AGING_COLUMNS = [

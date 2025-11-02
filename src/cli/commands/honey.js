@@ -1,8 +1,7 @@
 import { ValidationError } from '../../core/errors.js';
 import { formatMoney } from '../../core/money.js';
-import { readJson, writeJson } from '../../store/files.js';
+import { openBook, byId, byYardAndSeason } from '../../store/book.js';
 import { parseIdList } from '../parse.js';
-import { join } from 'node:path';
 import {
   makeDrum,
   netLb,
@@ -50,19 +49,23 @@ const DRUM_COLUMNS = [
   },
 ];
 
+const drumBook = (root) => openBook(root, DRUM_FILE, makeDrum);
+
 function loadDrums(root) {
-  return readJson(join(root, DRUM_FILE), { missing: [] }).map(makeDrum);
+  return drumBook(root).read();
 }
 
 function drumIndex(root) {
   return new Map(loadDrums(root).map((drum) => [drum.id, drum]));
 }
 
-function loadLots(root) {
+function lotBook(root) {
   const drums = drumIndex(root);
-  return readJson(join(root, LOT_FILE), { missing: [] }).map((lot) =>
-    makeLot(lot, drums)
-  );
+  return openBook(root, LOT_FILE, (lot) => makeLot(lot, drums));
+}
+
+function loadLots(root) {
+  return lotBook(root).read();
 }
 
 export function registerHoneyCommands(program, context) {
@@ -91,8 +94,7 @@ export function registerHoneyCommands(program, context) {
         floralSource: options.source,
         filledOn: options.on,
       });
-      const drums = loadDrums(desk.root).filter((entry) => entry.id !== drum.id);
-      writeJson(join(desk.root, DRUM_FILE), [...drums, drum]);
+      drumBook(desk.root).upsert(drum, byId);
       context.output.value({
         id: drum.id,
         netLb: netLb(drum),
@@ -137,10 +139,7 @@ export function registerHoneyCommands(program, context) {
         },
         drums
       );
-      const lots = readJson(join(desk.root, LOT_FILE), { missing: [] }).filter(
-        (entry) => entry.id !== lot.id
-      );
-      writeJson(join(desk.root, LOT_FILE), [...lots, lot]);
+      lotBook(desk.root).upsert(lot, byId);
       context.output.value(lotSummary(lot, drums));
     });
 
@@ -208,10 +207,7 @@ export function registerHoneyCommands(program, context) {
         coloniesAtEnd: Number(options.ended),
         netLb: Number(options.net),
       });
-      const crops = readJson(join(desk.root, CROP_FILE), { missing: [] }).filter(
-        (entry) => !(entry.yardId === crop.yardId && entry.season === crop.season)
-      );
-      writeJson(join(desk.root, CROP_FILE), [...crops, crop]);
+      openBook(desk.root, CROP_FILE, makeYardCrop).upsert(crop, byYardAndSeason);
       context.output.value({
         yard: crop.yardId,
         season: crop.season,
@@ -227,9 +223,7 @@ export function registerHoneyCommands(program, context) {
     .action((year, options) => {
       const desk = context.desk();
       const season = Number(year);
-      const crops = readJson(join(desk.root, CROP_FILE), { missing: [] }).map(
-        makeYardCrop
-      );
+      const crops = openBook(desk.root, CROP_FILE, makeYardCrop).read();
       const total = seasonTotal(crops, season);
       const payload = { ...total };
       if (options.price !== undefined) {

@@ -1,5 +1,4 @@
-import { join } from 'node:path';
-import { readJson, writeJson } from '../../store/files.js';
+import { openBook, byId, byStateAndYear } from '../../store/book.js';
 import { formatMoney } from '../../core/money.js';
 import { parseIdList } from '../parse.js';
 import {
@@ -34,10 +33,8 @@ import {
 const REGISTRATION_FILE = 'compliance/registrations.json';
 const DISPUTE_FILE = 'compliance/disputes.json';
 
-const readRegistrations = (root) =>
-  readJson(join(root, REGISTRATION_FILE), { missing: [] }).map(makeRegistration);
-const readDisputes = (root) =>
-  readJson(join(root, DISPUTE_FILE), { missing: [] }).map(makeDispute);
+const registrationBook = (root) => openBook(root, REGISTRATION_FILE, makeRegistration);
+const disputeBook = (root) => openBook(root, DISPUTE_FILE, makeDispute);
 
 export function registerComplianceCommands(program, context) {
   const registration = program
@@ -83,10 +80,7 @@ export function registerComplianceCommands(program, context) {
         filedOn: options.on,
         number: options.number,
       });
-      const existing = readRegistrations(desk.root).filter(
-        (entry) => !(entry.state === record.state && entry.year === record.year)
-      );
-      writeJson(join(desk.root, REGISTRATION_FILE), [...existing, record]);
+      registrationBook(desk.root).upsert(record, byStateAndYear);
       context.output.value({
         state: record.state,
         year: record.year,
@@ -103,7 +97,7 @@ export function registerComplianceCommands(program, context) {
     .action((options) => {
       const desk = context.desk();
       const rows = outstanding(
-        readRegistrations(desk.root),
+        registrationBook(desk.root).read(),
         parseIdList(options.states, 'states'),
         Number(options.year),
         desk.clock.today()
@@ -127,7 +121,7 @@ export function registerComplianceCommands(program, context) {
     .description('what has been filed and what it cost')
     .action(() => {
       const desk = context.desk();
-      const records = readRegistrations(desk.root);
+      const records = registrationBook(desk.root).read();
       if (context.output.json) {
         context.output.value({ records, totalFeeCents: totalFeeCents(records) });
         return;
@@ -144,10 +138,12 @@ export function registerComplianceCommands(program, context) {
     .requiredOption('--year <year>', 'registration year')
     .action((state, options) => {
       const desk = context.desk();
-      const record = readRegistrations(desk.root).find(
-        (entry) =>
-          entry.state === state.toUpperCase() && entry.year === Number(options.year)
-      );
+      const record = registrationBook(desk.root)
+        .read()
+        .find(
+          (entry) =>
+            entry.state === state.toUpperCase() && entry.year === Number(options.year)
+        );
       checkFiledInTime(
         record ??
           makeRegistration({ state, year: Number(options.year), hives: 0, apiaries: 0 })
@@ -179,10 +175,7 @@ export function registerComplianceCommands(program, context) {
         raisedOn: options.on,
         note: options.note,
       });
-      const existing = readDisputes(desk.root).filter(
-        (entry) => entry.id !== record.id
-      );
-      writeJson(join(desk.root, DISPUTE_FILE), [...existing, record]);
+      disputeBook(desk.root).upsert(record, byId);
       context.output.value({
         id: record.id,
         grounds: record.grounds,
@@ -196,8 +189,8 @@ export function registerComplianceCommands(program, context) {
     .option('--settled <cents>', 'what it settled for')
     .action((id, state, options) => {
       const desk = context.desk();
-      const book = readDisputes(desk.root);
-      const record = book.find((entry) => entry.id === id.toUpperCase());
+      const book = disputeBook(desk.root);
+      const record = book.find(byId, id.toUpperCase());
       if (!record) {
         context.output.warn(`no dispute ${id}`);
         process.exitCode = 3;
@@ -207,10 +200,7 @@ export function registerComplianceCommands(program, context) {
         settledCents:
           options.settled === undefined ? undefined : Number(options.settled),
       });
-      writeJson(
-        join(desk.root, DISPUTE_FILE),
-        book.map((entry) => (entry.id === moved.id ? moved : entry))
-      );
+      book.replace(moved, byId);
       context.output.value({ id: moved.id, state: moved.state });
     });
 
@@ -219,7 +209,7 @@ export function registerComplianceCommands(program, context) {
     .description('what is still open, soonest answer first')
     .action(() => {
       const desk = context.desk();
-      const book = readDisputes(desk.root);
+      const book = disputeBook(desk.root).read();
       const rows = openDisputes(book, desk.clock.today());
       if (context.output.json) {
         context.output.value({
