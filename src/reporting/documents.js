@@ -1,5 +1,6 @@
 import { NotFoundError } from '../core/errors.js';
 import { renderDetail, renderHeading, renderTable } from '../core/table.js';
+import { noteBlock } from '../core/text.js';
 import { formatSpan } from '../core/span.js';
 import { sortBy, sumBy } from '../core/collections.js';
 import { coloniesOn, occupiedCount, palletCapacity } from '../apiary/pallet.js';
@@ -53,6 +54,9 @@ export function setSheet(desk, contractId) {
   ];
   const shortTotal = sumBy(drops, shortBy);
   parts.push('', shortTotal === 0 ? 'nothing short' : `${shortTotal} hives short`);
+  for (const drop of drops.filter((entry) => entry.notes !== undefined)) {
+    parts.push('', noteBlock(`${drop.id} notes`, drop.notes));
+  }
   return parts.join('\n');
 }
 

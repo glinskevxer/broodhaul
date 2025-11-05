@@ -47,13 +47,20 @@ describe('setSheet', () => {
 
   it('shows the drop and what it came up short', () => {
     expect(sheet()).toContain('DR-2025-0004');
-    expect(sheet().trim().split('\n').pop()).toBe('4 hives short');
+    expect(sheet()).toContain('4 hives short');
   });
 
   it('says nothing short when the drop was filled', () => {
     const drop = desk.store.get('drops', 'DR-2025-0004');
     desk.save('drops', { ...drop, set: drop.ordered });
-    expect(sheet().trim().split('\n').pop()).toBe('nothing short');
+    expect(sheet()).toContain('nothing short');
+  });
+
+  it('prints the drop notes underneath, wrapped', () => {
+    expect(sheet()).toContain('DR-2025-0004 notes');
+    for (const line of sheet().split('\n')) {
+      expect(line.length).toBeLessThanOrEqual(64);
+    }
   });
 
   it('never leaves a trailing space', () => {
