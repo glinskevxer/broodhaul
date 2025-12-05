@@ -7,9 +7,17 @@ import { loadSeason } from '../../examples/season.js';
 import { seasonSummary } from '../../reporting/season.js';
 import { assessContract } from '../../contracts/assessment.js';
 import { buildInvoice, invoiceTotalCents } from '../../settlement/invoice.js';
-import { contractValueCents } from '../../contracts/contract.js';
+import { contractValueCents, contractedHives } from '../../contracts/contract.js';
 import { renderDocument } from '../../reporting/documents.js';
 import { exportCsv, exportNames } from '../../reporting/export.js';
+import { renderRegister, registerNames } from '../../reporting/registers.js';
+import { forecastToBloom } from '../../reporting/forecast.js';
+import {
+  takeSnapshot,
+  restoreSnapshot,
+  matchesSnapshot,
+  snapshotTotal,
+} from '../../store/snapshot.js';
 
 /**
  * A self test.
@@ -28,6 +36,9 @@ export const CHECKS = [
   'statement is discounted',
   'documents print',
   'exports parse',
+  'registers render',
+  'snapshot round trips',
+  'forecast holds against the contracts',
 ];
 
 export function runSelfTest({ today = '2025-03-20' } = {}) {
@@ -83,6 +94,29 @@ export function runSelfTest({ today = '2025-03-20' } = {}) {
       `${exported.length} exports`
     );
 
+    const rendered = registerNames().map((name) => renderRegister(desk, name));
+    note(
+      'registers render',
+      rendered.every((text) => text.includes('rows')),
+      `${rendered.length} registers`
+    );
+
+    const snapshot = takeSnapshot(desk.store, { takenAt: `${today}T12:00:00Z` });
+    desk.store.remove('yards', 'YD-2025-0001');
+    restoreSnapshot(desk.store, snapshot);
+    note(
+      'snapshot round trips',
+      matchesSnapshot(desk.store, snapshot),
+      `${snapshotTotal(snapshot)} records`
+    );
+
+    const bloom = forecastToBloom(desk.store.list('colonies').length);
+    note(
+      'forecast holds against the contracts',
+      bloom.atBloom < contractedHives(contract),
+      `${bloom.atBloom} at bloom`
+    );
+
     return {
       root,
       checks: CHECKS.length,
@@ -99,7 +133,12 @@ export function registerSelfTestCommands(program, context) {
   program
     .command('selftest')
     .description('load the worked season into a temporary directory and check it')
-    .action(() => {
+    .option('--list', 'name the checks without running them')
+    .action((options) => {
+      if (options.list) {
+        context.output.value(CHECKS);
+        return;
+      }
       const outcome = runSelfTest({ today: context.clock.today() });
       if (context.output.json) {
         context.output.value({

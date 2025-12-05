@@ -27,6 +27,12 @@ describe('runSelfTest', () => {
     expect(outcome.checks).toBe(CHECKS.length);
   });
 
+  it('checks the registers, the snapshot and the forecast too', () => {
+    expect(CHECKS).toContain('registers render');
+    expect(CHECKS).toContain('snapshot round trips');
+    expect(CHECKS).toContain('forecast holds against the contracts');
+  });
+
   it('cleans up the directory it used', () => {
     const outcome = runSelfTest();
     expect(existsSync(outcome.root)).toBe(false);
@@ -71,8 +77,37 @@ describe('selftest', () => {
     expect(status).toBe(0);
   });
 
+  it('names the checks without running them', async () => {
+    const { status, capture } = await run(['selftest', '--list'], { json: true });
+    expect(status).toBe(0);
+    expect(capture.parsed).toEqual(CHECKS);
+  });
+
+  it('runs the register check against every register', async () => {
+    const outcome = runSelfTest();
+    expect(
+      outcome.failures.find((entry) => entry.check === 'registers render')
+    ).toBeUndefined();
+  });
+
+  it('runs the snapshot check by removing a record and putting it back', async () => {
+    const outcome = runSelfTest();
+    expect(
+      outcome.failures.find((entry) => entry.check === 'snapshot round trips')
+    ).toBeUndefined();
+  });
+
+  it('runs the forecast check against the contracted hives', async () => {
+    const outcome = runSelfTest();
+    expect(
+      outcome.failures.find(
+        (entry) => entry.check === 'forecast holds against the contracts'
+      )
+    ).toBeUndefined();
+  });
+
   it('names every check it runs', () => {
-    expect(CHECKS).toHaveLength(7);
+    expect(CHECKS).toHaveLength(10);
     expect(new Set(CHECKS).size).toBe(CHECKS.length);
   });
 });
