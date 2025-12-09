@@ -73,6 +73,9 @@ Every command takes `--json` and writes machine readable output instead of
 tables. `--today` runs the program as though it were another day, which is how
 the tests work and how a report gets rerun for a date in the past.
 
+`OPERATIONS.md` is the order the office runs these in, from signing a contract
+in September to settling it in March.
+
 ## Running the checks
 
 ```
@@ -92,11 +95,11 @@ src/contracts/   contracts, terms, assessment, shortfall rules
 src/placement/   blocks, density, drops, drop plans
 src/movement/    loads, weights, certificates and permits
 src/health/      mite washes, thresholds, products, treatments, inspections
-src/feeding/     syrup
+src/feeding/     syrup, protein rations, feeding runs
 src/honey/       drums, lots, the crop
 src/settlement/  invoices and statements
-src/store/       files, the record store, the journal
-src/reporting/   the season report
+src/store/       files, the record store, the journal, snapshots, migrations
+src/reporting/   season, registers, documents, exports, kpis, forecast, audit
 src/cli/         the command line
 tests/           mirrors src/, one file per module
 ```

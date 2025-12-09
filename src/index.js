@@ -167,3 +167,14 @@ export {
 export { runMigrations, planMigration, latestVersion } from './store/migrate.js';
 export { runSelfTest, CHECKS } from './cli/commands/selftest.js';
 export { SEASON, loadSeason } from './examples/season.js';
+
+export { makeRegistration, calendarFor, feeCents } from './apiary/registration.js';
+export { makeDispute, openDisputes, remedyFor } from './contracts/dispute.js';
+export {
+  forecastToBloom,
+  splitsNeededFor,
+  contractCoverage,
+} from './reporting/forecast.js';
+export { activityByActor, historyOf, reworked } from './reporting/audit.js';
+export { wrapText, truncate, noteBlock, PAGE_WIDTH } from './core/text.js';
+export { openBook, byId } from './store/book.js';

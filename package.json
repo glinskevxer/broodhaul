@@ -2,7 +2,7 @@
   "name": "broodhaul",
   "version": "1.0.0",
   "private": true,
-  "description": "Pollination desk for a migratory beekeeping operation: colony grading, contract settlement, hauls and hive health",
+  "description": "Pollination desk for a migratory beekeeping operation: colony grading, contract settlement, hauls, hive health and the honey crop",
   "type": "module",
   "engines": {
     "node": ">=20.11"
@@ -16,7 +16,9 @@
   },
   "files": [
     "bin",
-    "src"
+    "src",
+    "README.md",
+    "OPERATIONS.md"
   ],
   "scripts": {
     "test": "vitest run",
@@ -36,5 +38,13 @@
     "globals": "15.15.0",
     "prettier": "3.5.1",
     "vitest": "3.0.5"
-  }
+  },
+  "keywords": [
+    "beekeeping",
+    "pollination",
+    "apiary",
+    "agriculture",
+    "cli"
+  ],
+  "license": "UNLICENSED"
 }
