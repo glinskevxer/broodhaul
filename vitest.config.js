@@ -21,11 +21,15 @@ export default defineConfig({
       provider: 'v8',
       include: ['src/**/*.js'],
       reporter: ['text', 'lcov'],
+      // Measured at 98.7 statements and 94.4 branches. The floors sit a
+      // couple of points under that: high enough that a module landing
+      // untested fails the build, loose enough that one uncovered branch in a
+      // refactor does not.
       thresholds: {
-        statements: 90,
-        branches: 85,
-        functions: 90,
-        lines: 90,
+        statements: 96,
+        branches: 92,
+        functions: 96,
+        lines: 96,
       },
     },
   },
