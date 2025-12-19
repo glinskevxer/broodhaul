@@ -29,6 +29,7 @@ import { registerYardworkCommands } from './commands/yardwork.js';
 import { registerComplianceCommands } from './commands/compliance.js';
 import { registerAuditCommands } from './commands/audit.js';
 import { registerForecastCommands } from './commands/forecast.js';
+import { registerMigrateCommands } from './commands/migrate.js';
 
 export const VERSION = '1.0.0';
 
@@ -108,6 +109,7 @@ export function buildProgram(context) {
   registerComplianceCommands(program, context);
   registerAuditCommands(program, context);
   registerForecastCommands(program, context);
+  registerMigrateCommands(program, context);
   return program;
 }
 

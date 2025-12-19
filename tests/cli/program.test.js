@@ -42,6 +42,7 @@ const TOP_LEVEL = [
   'kpi',
   'ledger',
   'load',
+  'migrate',
   'pallet',
   'print',
   'queen',
