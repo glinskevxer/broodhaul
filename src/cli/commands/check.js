@@ -22,9 +22,14 @@ export function registerCheckCommands(program, context) {
     .command('check')
     .description('every disagreement the desk can find')
     .option('--counts', 'just the count of each kind')
+    .option('--exit-zero', 'report the problems but do not fail')
+    .option('--only <kind>', 'only problems of this kind')
     .action((options) => {
       const desk = context.desk();
-      const found = options.counts ? problemCounts(desk) : problems(desk);
+      const all = options.only
+        ? problems(desk).filter((problem) => problem.kind === options.only)
+        : problems(desk);
+      const found = options.counts ? problemCounts(desk) : all;
       if (options.counts) {
         context.output.table(
           [
@@ -46,7 +51,7 @@ export function registerCheckCommands(program, context) {
           context.output.line(`${problem.kind}  ${rest}`);
         }
       }
-      if (problems(desk).length > 0) {
+      if (all.length > 0 && !options.exitZero) {
         process.exitCode = 1;
       }
     });

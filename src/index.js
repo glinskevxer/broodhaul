@@ -178,3 +178,9 @@ export {
 export { activityByActor, historyOf, reworked } from './reporting/audit.js';
 export { wrapText, truncate, noteBlock, PAGE_WIDTH } from './core/text.js';
 export { openBook, byId } from './store/book.js';
+export { registerNames as complianceStates } from './reporting/registers.js';
+export { advance as advanceDispute, exposureCents } from './contracts/dispute.js';
+export { checkFiledInTime, outstanding } from './apiary/registration.js';
+export { lossTable, walkStages, increaseFeasible } from './reporting/forecast.js';
+export { auditSummary, removedRecords } from './reporting/audit.js';
+export { indent, padTo, centre } from './core/text.js';

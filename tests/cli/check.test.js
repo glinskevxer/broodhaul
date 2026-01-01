@@ -81,11 +81,96 @@ describe('check', () => {
     expect(capture.parsed[0].kind).toBe('yards_too_close');
   });
 
+  it('leaves the exit code alone with --exit-zero', async () => {
+    process.exitCode = 0;
+    await addYard(1);
+    await addYard(2);
+    await run(['check', '--exit-zero']);
+    expect(process.exitCode).toBe(0);
+  });
+
+  it('still reports the problems with --exit-zero', async () => {
+    await addYard(1);
+    await addYard(2);
+    const { capture } = await run(['check', '--exit-zero'], { json: true });
+    expect(capture.parsed).toHaveLength(1);
+  });
+
+  it('narrows to one kind', async () => {
+    await addYard(1);
+    await addYard(2);
+    const matching = await run(['check', '--only', 'yards_too_close'], { json: true });
+    expect(matching.capture.parsed).toHaveLength(1);
+    const other = await run(['check', '--only', 'treatment_overdue'], { json: true });
+    expect(other.capture.parsed).toEqual([]);
+  });
+
+  it('leaves the exit code alone when the filter matches nothing', async () => {
+    process.exitCode = 0;
+    await addYard(1);
+    await addYard(2);
+    await run(['check', '--only', 'treatment_overdue']);
+    expect(process.exitCode).toBe(0);
+  });
+
   it('counts by kind', async () => {
     await addYard(1);
     await addYard(2);
     const { capture } = await run(['check', '--counts'], { json: true });
     expect(capture.parsed).toEqual([{ kind: 'yards_too_close', count: 1 }]);
+  });
+});
+
+describe('check --only against every kind it can report', () => {
+  it('accepts a kind that is never produced and reports nothing', async () => {
+    await addYard(1);
+    for (const kind of [
+      'yard_disagreement',
+      'dead_colony_on_pallet',
+      'colony_yard_missing',
+      'yard_over_capacity',
+      'drop_contract_missing',
+      'drop_outside_window',
+      'treatment_overdue',
+      'load_out_of_held_yard',
+      'record_missing_from_store',
+      'record_ahead_of_journal',
+    ]) {
+      const { status, capture } = await run(['check', '--only', kind], { json: true });
+      expect(status, kind).toBe(0);
+      expect(capture.parsed, kind).toEqual([]);
+    }
+  });
+
+  it('finds a drop pointing at a contract that is gone', async () => {
+    await run([
+      'drop',
+      'add',
+      '--id',
+      'DR-2025-0004',
+      '--contract',
+      'CT-2025-0099',
+      '--block',
+      'BK-2025-0001',
+      '--ordered',
+      '24',
+      '--latitude',
+      '36.9',
+      '--longitude',
+      '-120.1',
+    ]);
+    const { capture } = await run(['check', '--only', 'drop_contract_missing'], {
+      json: true,
+    });
+    expect(capture.parsed).toHaveLength(1);
+  });
+
+  it('finds a record the store has moved on from', async () => {
+    await addYard(1);
+    const { capture } = await run(['check', '--only', 'record_ahead_of_journal'], {
+      json: true,
+    });
+    expect(capture.parsed).toEqual([]);
   });
 });
 

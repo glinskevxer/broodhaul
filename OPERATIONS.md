@@ -12,8 +12,10 @@ broodhaul journal tail --limit 10
 ```
 
 `check` exits non zero when it finds anything, so it sits in the scheduled task
-and only sends mail when there is something to read. The journal tail is for
-the mornings when somebody else was in the records last night.
+and only sends mail when there is something to read. `--exit-zero` reports
+without failing, which is what a dashboard wants, and `--only <kind>` narrows
+to one thing while it is being worked on. The journal tail is for the mornings
+when somebody else was in the records last night.
 
 ## Before a season
 
@@ -89,6 +91,17 @@ broodhaul register health
 `health treat` refuses an application that breaks the label, uses up a season
 cap or repeats a chemical class. All three are legal problems rather than
 preferences.
+
+## After an upgrade
+
+```
+broodhaul migrate version
+broodhaul migrate plan
+broodhaul migrate run
+```
+
+Records written by an older build either parse or stop the program, so this is
+the first thing to run after pulling a new version. It is safe to run twice.
 
 ## Backups
 
