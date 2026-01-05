@@ -22,6 +22,22 @@ jobs:
       - run: npm ci
       - run: npx eslint . --max-warnings 0
 
+  checkout:
+    name: checkout
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: refuse a carriage return in a tracked text file
+        run: |
+          set -euo pipefail
+          offenders=$(git ls-files -z '*.js' '*.json' '*.yml' '*.md' | xargs -0 grep -lUP '\r' || true)
+          if [ -n "$offenders" ]; then
+            echo "these files carry carriage returns:"
+            echo "$offenders"
+            exit 1
+          fi
+          echo "every tracked text file is line feed only"
+
   format:
     name: format
     runs-on: ubuntu-latest

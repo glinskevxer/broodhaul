@@ -1,0 +1,13 @@
+# Every checkout gets line feeds, whatever the machine is set to.
+#
+# Without this, a clone on a Windows box with the usual git install writes
+# carriage returns into every file, and `prettier --check` then rejects the
+# entire tree on a repository nobody has touched. The suite passes, the lint
+# passes, and the format gate fails on a fresh clone only. It cost an afternoon
+# to work out the first time.
+* text=auto eol=lf
+
+# Nothing here is binary, but say so for the ones that would be if they grew.
+*.png binary
+*.jpg binary
+*.pdf binary
