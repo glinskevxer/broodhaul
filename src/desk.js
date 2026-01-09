@@ -1,5 +1,5 @@
 import { ValidationError } from './core/errors.js';
-import { requireString } from './core/validate.js';
+import { requireOneOf, requireString } from './core/validate.js';
 import { systemClock } from './core/clock.js';
 import { sortBy } from './core/collections.js';
 import { openStore } from './store/repository.js';
@@ -21,6 +21,34 @@ import { isHeldOn } from './health/inspection.js';
  */
 
 export const MINIMUM_YARD_SEPARATION_MILES = 0.5;
+
+/**
+ * Every kind of problem the desk can report.
+ *
+ * Written down rather than derived, because the point of the list is to catch
+ * a name that is no longer produced. A kind that is removed from a check and
+ * left here fails its own test; a kind added to a check and not listed fails
+ * the same one. Both have happened.
+ */
+export const PROBLEM_KINDS = [
+  'colony_yard_missing',
+  'dead_colony_on_pallet',
+  'drop_contract_missing',
+  'drop_outside_window',
+  'load_out_of_held_yard',
+  'pallet_colony_missing',
+  'pallet_yard_missing',
+  'record_ahead_of_journal',
+  'record_missing_from_store',
+  'treatment_overdue',
+  'yard_disagreement',
+  'yard_over_capacity',
+  'yards_too_close',
+];
+
+export function requireProblemKind(kind) {
+  return requireOneOf(kind, 'kind', PROBLEM_KINDS);
+}
 
 export function openDesk({ root, actor, clock = systemClock() } = {}) {
   const directory = requireString(root, 'root', { max: 400 });

@@ -39,6 +39,7 @@ const TOP_LEVEL = [
   'honey',
   'increase',
   'journal',
+  'kinds',
   'kpi',
   'ledger',
   'load',

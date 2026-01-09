@@ -1,4 +1,9 @@
-import { problems, problemCounts } from '../../desk.js';
+import {
+  problems,
+  problemCounts,
+  PROBLEM_KINDS,
+  requireProblemKind,
+} from '../../desk.js';
 import { storeCounts, collectionNames } from '../../store/repository.js';
 import {
   actors,
@@ -27,7 +32,9 @@ export function registerCheckCommands(program, context) {
     .action((options) => {
       const desk = context.desk();
       const all = options.only
-        ? problems(desk).filter((problem) => problem.kind === options.only)
+        ? problems(desk).filter(
+            (problem) => problem.kind === requireProblemKind(options.only)
+          )
         : problems(desk);
       const found = options.counts ? problemCounts(desk) : all;
       if (options.counts) {
@@ -54,6 +61,13 @@ export function registerCheckCommands(program, context) {
       if (all.length > 0 && !options.exitZero) {
         process.exitCode = 1;
       }
+    });
+
+  program
+    .command('kinds')
+    .description('every kind of problem the check can report')
+    .action(() => {
+      context.output.value(PROBLEM_KINDS);
     });
 
   program

@@ -4,6 +4,8 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import {
   MINIMUM_YARD_SEPARATION_MILES,
+  PROBLEM_KINDS,
+  requireProblemKind,
   openDesk,
   separationProblems,
   dropWindowProblems,
@@ -249,6 +251,43 @@ describe('journalProblems', () => {
     desk.save('yards', aYard({ sequence: 1 }));
     desk.store.remove('yards', 'YD-2025-0001');
     expect(journalProblems(desk)[0].kind).toBe('record_missing_from_store');
+  });
+});
+
+describe('PROBLEM_KINDS', () => {
+  it('is sorted and holds no duplicates', () => {
+    expect(PROBLEM_KINDS).toEqual([...PROBLEM_KINDS].sort());
+    expect(new Set(PROBLEM_KINDS).size).toBe(PROBLEM_KINDS.length);
+  });
+
+  it('names every kind the checks can actually produce', () => {
+    desk.save('yards', aYard({ sequence: 1 }));
+    desk.save('yards', aYard({ sequence: 2 }));
+    desk.save('drops', aDrop());
+    desk.save('treatments', aTreatment());
+    desk.save('inspections', anInspection());
+    desk.save('loads', {
+      id: 'LD-2025-0143',
+      truck: { unit: 'BH-7', kind: 'semi' },
+      driver: 'D Rasmussen',
+      originYardId: 'YD-2025-0001',
+      destination: { kind: 'yard', id: 'YD-2025-0002' },
+      pallets: ['PL-2025-0031'],
+    });
+    desk.store.put('colonies', aColony({ sequence: 11, yardId: 'YD-2025-0099' }));
+    for (const problem of problems(desk)) {
+      expect(PROBLEM_KINDS, problem.kind).toContain(problem.kind);
+    }
+  });
+
+  it('accepts every kind it lists', () => {
+    for (const kind of PROBLEM_KINDS) {
+      expect(requireProblemKind(kind)).toBe(kind);
+    }
+  });
+
+  it('refuses a kind nobody produces', () => {
+    expect(() => requireProblemKind('yards_to_close')).toThrow(/must be one of/);
   });
 });
 

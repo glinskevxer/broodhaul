@@ -174,6 +174,38 @@ describe('check --only against every kind it can report', () => {
   });
 });
 
+describe('kinds', () => {
+  it('names every kind the check can report', async () => {
+    const { status, capture } = await run(['kinds'], { json: true });
+    expect(status).toBe(0);
+    expect(capture.parsed).toContain('yards_too_close');
+    expect(capture.parsed).toContain('treatment_overdue');
+  });
+
+  it('lists them sorted', async () => {
+    const { capture } = await run(['kinds'], { json: true });
+    expect(capture.parsed).toEqual([...capture.parsed].sort());
+  });
+
+  it('refuses a misspelled kind rather than reporting nothing', async () => {
+    await addYard(1);
+    await addYard(2);
+    const { status, capture } = await run(['check', '--only', 'yards_to_close']);
+    expect(status).toBe(2);
+    expect(capture.stderr).toContain('must be one of');
+  });
+
+  it('still accepts a kind that is spelled right', async () => {
+    await addYard(1);
+    await addYard(2);
+    const { status, capture } = await run(['check', '--only', 'yards_too_close'], {
+      json: true,
+    });
+    expect(status).toBe(0);
+    expect(capture.parsed).toHaveLength(1);
+  });
+});
+
 describe('counts', () => {
   it('reports every collection', async () => {
     const { capture } = await run(['counts'], { json: true });
